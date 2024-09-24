@@ -33,7 +33,7 @@ import {
 } from "@material-ui/core";
 import ConfirmationModal from "../ConfirmationModal";
 
-const path = require('path');
+const path = require('path-browserify');
 
 const useStyles = makeStyles((theme) => ({
     root: {

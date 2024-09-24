@@ -10,13 +10,17 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import { versionSystem } from "../../../package.json";
+// import { versionSystem } from "../../../package.json";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
-import { nomeEmpresa } from "../../../package.json";
+import packaged from "../../../package.json";
 import { AuthContext } from "../../context/Auth/AuthContext";
 //import logo from "../../assets/logo.png";
 
+const {
+	versionSystem,
+	nomeEmpresa
+} = packaged
 
 const Copyright = () => {
 	return (

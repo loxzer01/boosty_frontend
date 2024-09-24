@@ -42,7 +42,7 @@ import {
   ContentCopy,
   DevicesFold,
   MoreVert,
-  WebhookOutlined
+  WebhookOutlined,
 } from "@mui/icons-material";
 import {
   Autocomplete,
@@ -53,7 +53,7 @@ import {
   Menu,
   MenuItem,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 import FlowBuilderModal from "../../components/FlowBuilderModal";
 import {
@@ -62,16 +62,18 @@ import {
   colorLineTableHover,
   colorPrimary,
   colorTitleTable,
-  colorTopTable
+  colorTopTable,
 } from "../../styles/styles";
+import AdiccionalFields from "./addicional";
+// import AdiccionalFields from "./addicional"
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
     const contacts = action.payload;
     const newContacts = [];
 
-    contacts.forEach(contact => {
-      const contactIndex = state.findIndex(c => c.id === contact.id);
+    contacts.forEach((contact) => {
+      const contactIndex = state.findIndex((c) => c.id === contact.id);
       if (contactIndex !== -1) {
         state[contactIndex] = contact;
       } else {
@@ -84,7 +86,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_CONTACTS") {
     const contact = action.payload;
-    const contactIndex = state.findIndex(c => c.id === contact.id);
+    const contactIndex = state.findIndex((c) => c.id === contact.id);
 
     if (contactIndex !== -1) {
       state[contactIndex] = contact;
@@ -97,7 +99,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_CONTACT") {
     const contactId = action.payload;
 
-    const contactIndex = state.findIndex(c => c.id === contactId);
+    const contactIndex = state.findIndex((c) => c.id === contactId);
     if (contactIndex !== -1) {
       state.splice(contactIndex, 1);
     }
@@ -109,23 +111,23 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   mainPaper: {
     flex: 1,
     backgroundColor: "#ffff",
     borderRadius: 12,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles
+    ...theme.scrollbarStyles,
   },
   online: {
     fontSize: 11,
-    color: "#25d366"
+    color: "#25d366",
   },
   offline: {
     fontSize: 11,
-    color: "#e1306c"
-  }
+    color: "#e1306c",
+  },
 }));
 
 const FlowDefault = () => {
@@ -148,7 +150,7 @@ const FlowDefault = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmDuplicateOpen, setConfirmDuplicateOpen] = useState(false);
 
-  const [configExist, setConfigExist] = useState(false)
+  const [configExist, setConfigExist] = useState(false);
 
   const [flowsData, setFlowsData] = useState([]);
   const [flowsDataObj, setFlowsDataObj] = useState([]);
@@ -160,13 +162,17 @@ const FlowDefault = () => {
   const [hasMore, setHasMore] = useState(false);
   const [reloadData, setReloadData] = useState(false);
 
-  const [selectedWhatsapp, setSelectedWhatsapp] = useState("")
-  const [whatsAppNames, setWhatsAppNames] = useState([])
-  const [whatsApps, setWhatsApps] = useState([])
-  const [whatsAppSelected, setWhatsAppSelected] = useState({})
+  const [selectedWhatsapp, setSelectedWhatsapp] = useState("");
+  const [whatsAppNames, setWhatsAppNames] = useState([]);
+  const [whatsApps, setWhatsApps] = useState([]);
+  const [whatsAppSelected, setWhatsAppSelected] = useState({});
   const { companyId, whatsAppId } = user;
 
   const socketManager = useContext(SocketContext);
+
+  const [fields, setFields] = useState([
+    { text: [], inputText: "", flujo: null, id: "" },
+  ]);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -174,66 +180,78 @@ const FlowDefault = () => {
   }, [searchParam]);
 
   const getFlows = async () => {
-
-    const getFlowsBuilder = await api.get("/flowbuilder").then(res => {
-      setFlowsData(res.data.flows.map(flow => flow.name));
+    const getFlowsBuilder = await api.get("/flowbuilder").then((res) => {
+      setFlowsData(res.data.flows.map((flow) => flow.name));
       setFlowsDataObj(res.data.flows);
-      return res.data.flows
+      return res.data.flows;
     });
 
-    console.log(getFlowsBuilder)
-    return getFlowsBuilder
+    console.log(getFlowsBuilder);
+    return getFlowsBuilder;
   };
 
-  const getFlowsDefault = async (flowData) => {
-    await api.get("/flowdefault").then(res => {
+  const getFlowsDefault = async (F) => {
+    await api.get("/flowdefault").then((res) => {
       if (res.data.flow?.companyId) {
-        setConfigExist(true)
+        setConfigExist(true);
+      }
+      if (res.data.flowPhrase) {
+        const data = res.data.flowPhrase.map((item) => {
+          return {
+            text: item.phrase.split(","),
+            flujo: Number(item.phraseId),
+            id: item.id,
+            inputText: "",
+          };
+        });
+        console.log(data);
+        setFields([...data, ...fields]);
       }
       if (res.data.flow?.flowIdWelcome) {
-        const flowName = flowData.filter(item => item.id === res.data.flow.flowIdWelcome)
+        const flowName = F.filter(
+          (item) => item.id === res.data.flow.flowIdWelcome
+        );
         if (flowName.length > 0) {
           setFlowSelectedWelcome(flowName[0].name);
         } else {
-          setFlowSelectedWelcome()
+          setFlowSelectedWelcome();
         }
-
       }
       if (res.data.flow?.flowIdNotPhrase) {
-        const flowName = flowData.filter(item => item.id === res.data.flow.flowIdNotPhrase)
+        const flowName = F.filter(
+          (item) => item.id === res.data.flow.flowIdNotPhrase
+        );
         if (flowName.length > 0) {
           setFlowSelectedPhrase(flowName[0].name);
         } else {
           setFlowSelectedPhrase();
         }
-
       }
-      setLoading(false)
+      setLoading(false);
     });
   };
 
   useEffect(() => {
-    setLoading(true)
+    setLoading(true);
     const delayDebounceFn = setTimeout(() => {
       const fetchContacts = async () => {
         api
           .get(`/whatsapp`, { params: { companyId, session: 0 } })
           .then(({ data }) => {
-            setWhatsApps(data)
-          })
-      }
+            setWhatsApps(data);
+          });
+      };
       fetchContacts();
-      setLoading(false)
-    }, 500)
-    return () => clearTimeout(delayDebounceFn)
-  }, [])
-
+      setLoading(false);
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, []);
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.getSocket(companyId);
 
-    socket.on(`company-${companyId}-contact`, data => {
+    socket.on(`company-${companyId}-contact`, (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_CONTACTS", payload: data.contact });
       }
@@ -242,10 +260,10 @@ const FlowDefault = () => {
         dispatch({ type: "DELETE_CONTACT", payload: +data.contactId });
       }
     });
-    setLoading(true)
-    getFlows().then(res => {
-      getFlowsDefault(res)
-    })
+    setLoading(true);
+    getFlows().then((res) => {
+      getFlowsDefault(res);
+    });
 
     //getWhatsappSession()
 
@@ -254,24 +272,23 @@ const FlowDefault = () => {
     };
   }, [socketManager]);
 
-
   const handleCloseContactModal = () => {
     setSelectedContactId(null);
     setContactModalOpen(false);
   };
 
-  const handleCloseOrOpenTicket = ticket => {
+  const handleCloseOrOpenTicket = (ticket) => {
     setNewTicketModalOpen(false);
     if (ticket !== undefined && ticket.uuid !== undefined) {
       history.push(`/tickets/${ticket.uuid}`);
     }
   };
 
-  const handleDeleteWebhook = async webhookId => {
+  const handleDeleteWebhook = async (webhookId) => {
     try {
-      await api.delete(`/flowbuilder/${webhookId}`).then(res => {
+      await api.delete(`/flowbuilder/${webhookId}`).then((res) => {
         setDeletingContact(null);
-        setReloadData(old => !old);
+        setReloadData((old) => !old);
       });
       toast.success("Fluxo excluído com sucesso");
     } catch (err) {
@@ -279,49 +296,73 @@ const FlowDefault = () => {
     }
   };
 
-
   const handleSaveDefault = async () => {
-    console.log(configExist)
+    console.log(configExist);
 
-    let idWelcome = flowsDataObj.filter(item => item.name === flowSelectedWelcome)
-    let idPhrase = flowsDataObj.filter(item => item.name === flowSelectedPhrase)
+    let idWelcome = flowsDataObj.filter(
+      (item) => item.name === flowSelectedWelcome
+    );
+    let idPhrase = flowsDataObj.filter(
+      (item) => item.name === flowSelectedPhrase
+    );
     if (idWelcome.length === 0) {
-      idWelcome = null
+      idWelcome = null;
     } else {
-      idWelcome = idWelcome[0].id
+      idWelcome = idWelcome[0].id;
     }
     if (idPhrase.length === 0) {
-      idPhrase = null
+      idPhrase = null;
     } else {
-      idPhrase = idPhrase[0].id
+      idPhrase = idPhrase[0].id;
     }
 
     if (configExist) {
       try {
-        await api.put(`/flowdefault`, { flowIdWelcome: idWelcome, flowIdPhrase: idPhrase }).then(res => {
-          setDeletingContact(null);
-          setReloadData(old => !old);
-        });
+        await api
+          .put(`/flowdefault`, {
+            flowIdWelcome: idWelcome,
+            flowIdPhrase: idPhrase,
+            flowPhrase: fields
+              .filter((item) => {
+                const bool = (item.flujo === null) | (item.text.length === 0);
+                return !bool;
+              })
+              .map((item) => {
+                return {
+                  phrase: item.text.join(","),
+                  phraseId: Number(flowsData.indexOf(item.flujo) + 1),
+                  id: item.id ? item.id : null,
+                };
+              }),
+          })
+          .then((res) => {
+            setDeletingContact(null);
+            setReloadData((old) => !old);
+          });
         toast.success("Fluxos padrões atualizados");
       } catch (err) {
         toastError(err);
       }
     } else {
       try {
-        await api.post(`/flowdefault`, { flowIdWelcome: idWelcome, flowIdPhrase: idPhrase }).then(res => {
-          setDeletingContact(null);
-          setReloadData(old => !old);
-        });
+        await api
+          .post(`/flowdefault`, {
+            flowIdWelcome: idWelcome,
+            flowIdPhrase: idPhrase,
+          })
+          .then((res) => {
+            setDeletingContact(null);
+            setReloadData((old) => !old);
+          });
         toast.success("Fluxos padrões atualizados");
       } catch (err) {
         toastError(err);
       }
     }
-
   };
-  
+
   const loadMore = () => {
-    setPageNumber(prevState => prevState + 1);
+    setPageNumber((prevState) => prevState + 1);
   };
 
   return (
@@ -329,7 +370,7 @@ const FlowDefault = () => {
       <NewTicketModal
         modalOpen={newTicketModalOpen}
         initialContact={contactTicket}
-        onClose={ticket => {
+        onClose={(ticket) => {
           handleCloseOrOpenTicket(ticket);
         }}
       />
@@ -339,19 +380,20 @@ const FlowDefault = () => {
         aria-labelledby="form-dialog-title"
         flowId={selectedContactId}
         nameWebhook={selectedWebhookName}
-        onSave={() => setReloadData(old => !old)}
+        onSave={() => setReloadData((old) => !old)}
       ></FlowBuilderModal>
       <ConfirmationModal
         title={
           deletingContact
-            ? `${i18n.t("contacts.confirmationModal.deleteTitle")} ${deletingContact.name
-            }?`
+            ? `${i18n.t("contacts.confirmationModal.deleteTitle")} ${
+                deletingContact.name
+              }?`
             : `${i18n.t("contacts.confirmationModal.importTitlte")}`
         }
         open={confirmOpen}
         onClose={setConfirmOpen}
-        onConfirm={e =>
-          deletingContact ? handleDeleteWebhook(deletingContact.id) : () => { }
+        onConfirm={(e) =>
+          deletingContact ? handleDeleteWebhook(deletingContact.id) : () => {}
         }
       >
         {deletingContact
@@ -361,107 +403,120 @@ const FlowDefault = () => {
       <MainHeader>
         <Title>Flujo predeterminado</Title>
       </MainHeader>
-      <Paper
-        className={classes.mainPaper}
-        variant="outlined"
-      >
-        <Stack sx={{ padding: '12px', position: 'relative' }}>
-
-          <Stack sx={{ position: 'absolute', right: 0 }}>
-
+      <Paper className={classes.mainPaper} variant="outlined">
+        <Stack sx={{ padding: "12px", position: "relative" }}>
+          <Stack sx={{ position: "absolute", right: 0 }}>
             {/* BOTÃO SALVAR */}
-            <Button onClick={() => handleSaveDefault()} variant="contained" sx={{
-              backgroundColor: colorPrimary(), '&:hover': {
-                backgroundColor: `${colorPrimary()} 90`
-              }
-            }}>Guardar</Button>
+            <Button
+              onClick={() => handleSaveDefault()}
+              variant="contained"
+              sx={{
+                backgroundColor: colorPrimary(),
+                "&:hover": {
+                  backgroundColor: `${colorPrimary()} 90`,
+                },
+              }}
+            >
+              Guardar
+            </Button>
             {/* FIM BOTÃO SALVAR */}
-
           </Stack>
 
-          <Stack gap={'12px'}>
-
-            <Typography fontSize={18} fontWeight={700}>Flujo de bienvenida</Typography>
-
-
-            <Typography fontSize={12}>
-              Este flujo se activa solo para nuevos contactos, personas que
-              no tienes en tu lista de contactos y que han enviado un mensaje
+          <Stack gap={"12px"}>
+            <Typography fontSize={18} fontWeight={700}>
+              Flujo de bienvenida
             </Typography>
 
-            {!loading && (<Autocomplete
-              disablePortal
-              id="combo-box-demo"
-              value={flowSelectedWelcome}
-              options={flowsData}
-              onChange={(event, newValue) => {
-                setFlowSelectedWelcome(newValue);
-              }}
-              sx={{ width: "100%" }}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  variant="outlined"
-                  placeholder="Elige un flujo"
-                />
-              )}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Chip
-                    variant="outlined"
-                    label={option}
-                    {...getTagProps({ index })}
-                    style={{ borderRadius: "8px" }}
-                  />
-                ))
-              }
-            />)}
+            <Typography fontSize={12}>
+              Este flujo se activa solo para nuevos contactos, personas que no
+              tienes en tu lista de contactos y que han enviado un mensaje
+            </Typography>
 
+            {!loading && (
+              <Autocomplete
+                disablePortal
+                id="combo-box-demo"
+                value={flowSelectedWelcome}
+                options={flowsData}
+                onChange={(event, newValue) => {
+                  setFlowSelectedWelcome(newValue);
+                }}
+                sx={{ width: "100%" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="outlined"
+                    placeholder="Elige un flujo"
+                  />
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                      style={{ borderRadius: "8px" }}
+                    />
+                  ))
+                }
+              />
+            )}
 
             {loading && (
-              <Stack alignSelf={'center'}>
+              <Stack alignSelf={"center"}>
                 <CircularProgress sx={{ color: colorPrimary() }} />
               </Stack>
             )}
           </Stack>
 
-          <Stack gap={'12px'} marginTop={4}>
-            <Typography fontSize={18} fontWeight={700}>Flujo de respuesta predeterminada</Typography>
-            <Typography fontSize={12}>
-              La Respuesta Predeterminada se envía con cualquier carácter diferente de una palabra clave.
+          <Stack gap={"12px"} marginTop={4}>
+            <Typography fontSize={18} fontWeight={700}>
+              Flujo de respuesta predeterminada
             </Typography>
-            {!loading && (<Autocomplete
-              disablePortal
-              id="combo-box-demo"
-              value={flowSelectedPhrase}
-              options={flowsData}
-              onChange={(event, newValue) => {
-                setFlowSelectedPhrase(newValue);
-              }}
-              sx={{ width: "100%" }}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  variant="outlined"
-                  placeholder="Elige un flujo"
-                />
-              )}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Chip
+            <Typography fontSize={12}>
+              La Respuesta Predeterminada se envía con cualquier carácter
+              diferente de una palabra clave.
+            </Typography>
+            {!loading && (
+              <Autocomplete
+                disablePortal
+                id="combo-box-demo"
+                value={flowSelectedPhrase}
+                options={flowsData}
+                onChange={(event, newValue) => {
+                  setFlowSelectedPhrase(newValue);
+                }}
+                sx={{ width: "100%" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
                     variant="outlined"
-                    label={option}
-                    {...getTagProps({ index })}
-                    style={{ borderRadius: "8px" }}
+                    placeholder="Elige un flujo"
                   />
-                ))
-              }
-            />)}
-            {loading && (<Stack alignSelf={'center'}>
-              <CircularProgress sx={{ color: colorPrimary() }} />
-            </Stack>)}
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                      style={{ borderRadius: "8px" }}
+                    />
+                  ))
+                }
+              />
+            )}
+            {loading && (
+              <Stack alignSelf={"center"}>
+                <CircularProgress sx={{ color: colorPrimary() }} />
+              </Stack>
+            )}
           </Stack>
-
+          <AdiccionalFields
+            flowsData={flowsData}
+            setFields={setFields}
+            fields={fields}
+          />
         </Stack>
       </Paper>
     </MainContainer>
