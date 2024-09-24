@@ -76,12 +76,12 @@
     "zustand": "^4.4.1"
   },
   "scripts": {
-    "start": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts start",
-    "start:test": "react-scripts start",
-    "build": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && NODE_OPTIONS=--openssl-legacy-provider GENERATE_SOURCEMAP=false react-scripts build",
-    "builddev": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts build",
-    "test": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts test",
-    "eject": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts eject"
+    "start": "react-scripts start",
+    "build": "NODE_OPTIONS=--max-old-space-size=8192 NODE_OPTIONS=--openssl-legacy-provider GENERATE_SOURCEMAP=false react-scripts build",
+    "build:dev": "NODE_OPTIONS=--max-old-space-size=8192 react-scripts build",
+    "test": "NODE_OPTIONS=--max-old-space-size=8192 react-scripts test",
+    "eject": "react-scripts eject",
+    "clean": "rm -rf node_modules/ build/ && npm install"
   },
   "eslintConfig": {
     "extends": "react-app"
