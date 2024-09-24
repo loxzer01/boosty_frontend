@@ -192,7 +192,7 @@ const CampaignModal = ({
         });
       });
     }
-  }, [campaignId, open, initialValues, companyId]);
+  }, [campaignId, open, initialValues]);
 
   useEffect(() => {
     const now = moment();

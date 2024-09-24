@@ -2,7 +2,7 @@ import React, { useEffect, useReducer, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import toastError from "../../errors/toastError";
 import Popover from "@material-ui/core/Popover";
-import AnnouncementIcon from "@material-ui/icons/Announcement";
+// import AnnouncementIcon from "@material-ui/icons/Announcement";
 import Notifications from "@material-ui/icons/Notifications"
 
 import {
