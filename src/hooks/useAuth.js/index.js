@@ -35,22 +35,30 @@ const useAuth = () => {
     },
     async (error) => {
       const originalRequest = error.config;
-      if (error?.response?.status === 403 && !originalRequest._retry) {
-        originalRequest._retry = true;
 
-        const { data } = await api.post("/auth/refresh_token");
-        if (data) {
-          localStorage.setItem("token", JSON.stringify(data.token));
-          api.defaults.headers.Authorization = `Bearer ${data.token}`;
+      if (error.response.status === 403 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        try {
+          const { data } = await api.post("/auth/refresh_token");
+          if (data) {
+            localStorage.setItem("token", JSON.stringify(data.token));
+            localStorage.setItem(
+              "tokenExpDate",
+              moment().add(1, "hour").toISOString()
+            );
+            api.defaults.headers.Authorization = `Bearer ${data.token}`;
+            return api(originalRequest);
+          }
+        } catch (err) {
+          handleLogout();
+          return Promise.reject(err);
         }
-        return api(originalRequest);
       }
-      if (error?.response?.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("companyId");
-        api.defaults.headers.Authorization = undefined;
-        setIsAuth(false);
+
+      if (error.response.status === 401) {
+        handleLogout();
       }
+
       return Promise.reject(error);
     }
   );
@@ -61,13 +69,24 @@ const useAuth = () => {
     const token = localStorage.getItem("token");
     (async () => {
       if (token) {
-        try {
-          const { data } = await api.post("/auth/refresh_token");
-          api.defaults.headers.Authorization = `Bearer ${data.token}`;
-          setIsAuth(true);
-          setUser(data.user);
-        } catch (err) {
-          toastError(err);
+        const tokenExpDate = moment(localStorage.getItem("tokenExpDate"));
+        const now = moment();
+
+        if (tokenExpDate.isBefore(now)) {
+          try {
+            const { data } = await api.post("/auth/refresh_token");
+            api.defaults.headers.Authorization = `Bearer ${data.token}`;
+            localStorage.setItem("token", JSON.stringify(data.token));
+            localStorage.setItem(
+              "tokenExpDate",
+              moment().add(1, "hour").toISOString()
+            );
+            setIsAuth(true);
+            setUser(data.user);
+          } catch (err) {
+            toastError(err);
+            handleLogout(); // Si no se puede refrescar, desloguear
+          }
         }
       }
       setLoading(false);
@@ -77,7 +96,6 @@ const useAuth = () => {
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     if (companyId) {
-   
       const socket = socketManager.getSocket(companyId);
 
       socket.on(`company-${companyId}-user`, (data) => {
@@ -85,12 +103,11 @@ const useAuth = () => {
           setUser(data.user);
         }
       });
-    
-    
-    return () => {
-      socket.disconnect();
-    };
-  }
+
+      return () => {
+        socket.disconnect();
+      };
+    }
   }, [socketManager, user]);
 
   const handleLogin = async (userData) => {
@@ -111,7 +128,7 @@ const useAuth = () => {
         }
       }
 
-      moment.locale('pt-br');
+      moment.locale("pt-br");
       const dueDate = data.user.company.dueDate;
       const hoje = moment(moment()).format("DD/MM/yyyy");
       const vencimento = moment(dueDate).format("DD/MM/yyyy");
@@ -131,7 +148,11 @@ const useAuth = () => {
         setIsAuth(true);
         toast.success(i18n.t("auth.toasts.success"));
         if (Math.round(dias) < 5) {
-          toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
+          toast.warn(
+            `Sua assinatura vence em ${Math.round(dias)} ${
+              Math.round(dias) === 1 ? "dia" : "dias"
+            } `
+          );
         }
         history.push("/tickets");
         setLoading(false);
@@ -141,7 +162,7 @@ Entre em contato com o Suporte para mais informações! `);
         setLoading(false);
       }
 
-      //quebra linha 
+      //quebra linha
     } catch (err) {
       toastError(err);
       setLoading(false);
