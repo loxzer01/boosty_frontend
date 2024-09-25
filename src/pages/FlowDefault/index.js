@@ -298,69 +298,51 @@ const FlowDefault = () => {
 
   const handleSaveDefault = async () => {
     console.log(configExist);
-
-    let idWelcome = flowsDataObj.filter(
-      (item) => item.name === flowSelectedWelcome
-    );
-    let idPhrase = flowsDataObj.filter(
-      (item) => item.name === flowSelectedPhrase
-    );
-    if (idWelcome.length === 0) {
-      idWelcome = null;
-    } else {
-      idWelcome = idWelcome[0].id;
-    }
-    if (idPhrase.length === 0) {
-      idPhrase = null;
-    } else {
-      idPhrase = idPhrase[0].id;
-    }
-
-    if (configExist) {
-      try {
-        await api
-          .put(`/flowdefault`, {
-            flowIdWelcome: idWelcome,
-            flowIdPhrase: idPhrase,
-            flowPhrase: fields
-              .filter((item) => {
-                const bool = (item.flujo === null) | (item.text.length === 0);
-                return !bool;
-              })
-              .map((item) => {
-                return {
-                  phrase: item.text.join(","),
-                  phraseId: Number(flowsData.indexOf(item.flujo) + 1),
-                  id: item.id ? item.id : null,
-                };
-              }),
-          })
-          .then((res) => {
-            setDeletingContact(null);
-            setReloadData((old) => !old);
-          });
+  
+    // Obtener el id del flujo de bienvenida
+    let idWelcome = flowsDataObj.find((item) => item.name === flowSelectedWelcome);
+    idWelcome = idWelcome ? idWelcome.id : null;
+  
+    // Obtener el id del flujo de frase
+    let idPhrase = flowsDataObj.find((item) => item.name === flowSelectedPhrase);
+    idPhrase = idPhrase ? idPhrase.id : null;
+  
+    // Filtrar y mapear los campos para obtener los flujos de frase
+    const flowPhraseData = fields
+      .filter((item) => item.flujo !== null && item.text.length > 0)
+      .map((item) => {
+        const phraseId = flowsData.findIndex((flowItem) => flowItem === item.flujo) + 1;
+        return {
+          phrase: item.text.join(","),
+          phraseId: phraseId > 0 ? phraseId : null,  // Validar que phraseId no sea 0
+          id: item.id || null,
+        };
+      });
+  
+    try {
+      if (configExist) {
+        // Actualizar configuración existente
+        await api.put(`/flowdefault`, {
+          flowIdWelcome: idWelcome,
+          flowIdPhrase: idPhrase,
+          flowPhrase: flowPhraseData,
+        });
         toast.success("Fluxos padrões atualizados");
-      } catch (err) {
-        toastError(err);
-      }
-    } else {
-      try {
-        await api
-          .post(`/flowdefault`, {
-            flowIdWelcome: idWelcome,
-            flowIdPhrase: idPhrase,
-          })
-          .then((res) => {
-            setDeletingContact(null);
-            setReloadData((old) => !old);
-          });
+      } else {
+        // Crear nueva configuración
+        await api.post(`/flowdefault`, {
+          flowIdWelcome: idWelcome,
+          flowIdPhrase: idPhrase,
+        });
         toast.success("Fluxos padrões atualizados");
-      } catch (err) {
-        toastError(err);
       }
+      setDeletingContact(null);
+      setReloadData((old) => !old);
+    } catch (err) {
+      toastError(err);
     }
   };
-
+  
   const loadMore = () => {
     setPageNumber((prevState) => prevState + 1);
   };
