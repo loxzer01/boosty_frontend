@@ -75,8 +75,8 @@
     "zustand": "^4.4.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider GENERATE_SOURCEMAP=false react-scripts build",
+    "start": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts start",
+    "build": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && NODE_OPTIONS=--openssl-legacy-provider GENERATE_SOURCEMAP=false react-scripts build",
     "builddev": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts build",
     "test": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts test",
     "eject": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts eject",
