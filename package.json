@@ -20,7 +20,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.0.4",
     "@testing-library/user-event": "^12.1.7",
-    "axios": "^0.21.1",
+    "axios": "^1.7.7",
     "bootstrap": "^5.2.3",
     "chart.js": "^3.9.1",
     "chartjs-plugin-datalabels": "^2.1.0",
@@ -38,6 +38,7 @@
     "material-ui-color": "^1.2.0",
     "mic-recorder-to-mp3": "^2.2.2",
     "moment": "^2.29.1",
+    "path-browserify": "^1.0.1",
     "qrcode.react": "^1.0.0",
     "query-string": "^7.0.0",
     "react": "^17.0.2",
@@ -58,7 +59,7 @@
     "react-qr-code": "^2.0.7",
     "react-query": "^3.39.3",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "3.4.3",
+    "react-scripts": "^5.0.1",
     "react-text-mask": "^5.5.0",
     "react-toastify": "9.0.0",
     "react-trello": "^2.2.11",
@@ -75,12 +76,12 @@
     "zustand": "^4.4.1"
   },
   "scripts": {
-    "start": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts start",
-    "build": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && NODE_OPTIONS=--openssl-legacy-provider GENERATE_SOURCEMAP=false react-scripts build",
-    "builddev": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts build",
-    "test": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts test",
-    "eject": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts eject",
-    "start:test": "react-scripts start"
+    "start": "react-scripts start",
+    "build": " react-scripts build",
+    "build:dev": "NODE_OPTIONS=--max-old-space-size=8192 react-scripts build",
+    "test": "NODE_OPTIONS=--max-old-space-size=8192 react-scripts test",
+    "eject": "react-scripts eject",
+    "clean": "rm -rf node_modules/ build/ && npm install"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -96,5 +97,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
 }
