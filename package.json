@@ -77,9 +77,9 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "NODE_OPTIONS=--max-old-space-size=8192 react-scripts build",
-    "build:dev": "NODE_OPTIONS=--max-old-space-size=8192 react-scripts build",
-    "test": "NODE_OPTIONS=--max-old-space-size=8192 react-scripts test",
+    "build": "react-scripts build",
+    "build:dev": "react-scripts build",
+    "test": "react-scripts test",
     "eject": "react-scripts eject",
     "clean": "rm -rf node_modules/ build/ && npm install"
   },
