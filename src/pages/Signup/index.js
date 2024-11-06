@@ -31,6 +31,7 @@ import { i18n } from "../../translate/i18n";
 import { openApi } from "../../services/api";
 import toastError from "../../errors/toastError";
 import moment from "moment";
+import Notification from "../../components/Notification";
 const Copyright = () => {
 	return (
 		<Typography variant="body2" color="textSecondary" align="center">
@@ -83,8 +84,10 @@ const SignUp = () => {
 		companyId = params.companyId
 	}
 
+	const [isRegister, setIsRegister] = useState(false);
 	const initialState = { name: "", email: "", phone: "", password: "", planId: "", };
 
+	console.log(isRegister)
 	const [user] = useState(initialState);
 	const dueDate = moment().add(3, "day").format();
 	const handleSignUp = async values => {
@@ -93,9 +96,13 @@ const SignUp = () => {
 		Object.assign(values, { status: "t" });
 		Object.assign(values, { campaignsEnabled: true });
 		try {
-			await openApi.post("/companies/cadastro", values);
-			toast.success(i18n.t("signup.toasts.success"));
-			history.push("/login");
+			const data = await openApi.post("/companies/cadastro", values);
+			console.log(data)
+			if (data.status >= 200 && data.status <= 299) setIsRegister(true);
+			setTimeout(()=>{
+				toast.success(i18n.t("signup.toasts.success"));
+				history.push("/login");
+			},5000)
 		} catch (err) {
 			console.log(err);
 			toastError(err);
@@ -122,6 +129,11 @@ const SignUp = () => {
 	return (
 		<Container component="main" maxWidth="xs">
 			<CssBaseline />
+			{
+				isRegister ? <Notification
+				message={"Se envio un link por correo para validar su cuenta creada"}
+				/> : null 
+			}
 			<div className={classes.paper}>
 				<div>
 				<img style={{ margin: "0 auto", width: "80%" }} src={logoWithRandom} alt={`${process.env.REACT_APP_NAME_SYSTEM}`} />

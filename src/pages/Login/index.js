@@ -15,6 +15,7 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import packaged from "../../../package.json";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import Notification from "../../components/Notification";
 //import logo from "../../assets/logo.png";
 
 const { versionSystem, nomeEmpresa } = packaged;
@@ -72,6 +73,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Login = () => {
+  // console.log(window.location.href.split("="))
+  const isValidate = window.location.href.split("=")[1] === "validated";
   const classes = useStyles();
 
   const [user, setUser] = useState({ email: "", password: "" });
@@ -82,6 +85,7 @@ const Login = () => {
   const handleChangeInput = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
+  console.log(isValidate)
 
   useEffect(() => {
     fetchviewregister();
@@ -110,6 +114,9 @@ const Login = () => {
 
   return (
     <div className={classes.root}>
+      {isValidate ? (
+      <Notification message={"Se valido tu cuenta, ahora puedes iniciar session"} />
+      ) : null}
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
